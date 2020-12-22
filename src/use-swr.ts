@@ -473,7 +473,6 @@ function useSWR<Data = any, Error = any>(
           dispatch({ isValidating: false })
           return false
         }
-
         cache.set(key, newData)
         cache.set(keyErr, undefined)
         cache.set(keyValidating, false)
@@ -542,10 +541,8 @@ function useSWR<Data = any, Error = any>(
   // mounted (client side rendering)
   useIsomorphicLayoutEffect(() => {
     if (!key) return undefined
-
     // after `key` updates, we need to mark it as mounted
     unmountedRef.current = false
-
     initialMountedRef.current = true
 
     // after the component is mounted (hydrated),
@@ -776,7 +773,6 @@ function useSWR<Data = any, Error = any>(
       // in suspense mode, throw error if there's no content
       throw latestError
     }
-
     // return the latest data / error from cache
     // in case `key` has changed
     return {
