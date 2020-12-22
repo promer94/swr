@@ -35,3 +35,6 @@ yarn-error.log*
 
 # changes to pages、public adn styles should be ignore
 swr
+pages
+public
+styles
