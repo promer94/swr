@@ -519,6 +519,10 @@ function useSWR<Data = any, Error = any>(
             // also broadcast to update other hooks
             broadcastState(key, undefined, err, false)
           }
+        } else {
+          dispatch({
+            isValidating: false
+          })
         }
 
         // events and retry
