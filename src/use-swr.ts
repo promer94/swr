@@ -34,7 +34,7 @@ const IS_SERVER =
 
 // polyfill for requestAnimationFrame
 const rAF = IS_SERVER
-  ? null
+  ? () => {}
   : window['requestAnimationFrame'] || (f => setTimeout(f, 1))
 
 // React currently throws a warning when using useLayoutEffect on the server.

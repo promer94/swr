@@ -828,40 +828,37 @@ describe('useSWR - revalidate', () => {
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"1"`)
   })
 
-  it('should respect sequences of revalidation calls (cope with race condition)', async () => {
-    let faster = false
-
+  it('should keep isValidating be true when there are two concurrent requests', async () => {
     function Page() {
-      const { data, revalidate } = useSWR(
-        'race',
+      const { isValidating, revalidate } = useSWR(
+        'keep isValidating for concurrent requests',
         () =>
           new Promise(res => {
-            const value = faster ? 1 : 0
-            setTimeout(() => res(value), faster ? 100 : 200)
-          })
+            setTimeout(res, 200)
+          }),
+        { revalidateOnMount: false }
       )
 
-      return <button onClick={revalidate}>{data}</button>
+      return (
+        <button onClick={revalidate}>{isValidating ? 'true' : 'false'}</button>
+      )
     }
 
     const { container } = render(<Page />)
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"false"`)
 
-    expect(container.firstChild.textContent).toMatchInlineSnapshot(`""`)
-
-    // mount
-    await screen.findByText('0')
-
-    // trigger the slower revalidation
-    faster = false
+    // trigger the first revalidation
     fireEvent.click(container.firstElementChild)
-    await sleep(10)
-    // trigger the faster revalidation
-    faster = true
+    await act(() => sleep(100))
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"true"`)
+
     fireEvent.click(container.firstElementChild)
+    await act(() => sleep(110))
+    // first revalidation is over, second revalidation is still in progress
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"true"`)
 
-    await act(() => sleep(210))
-
-    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"1"`)
+    await act(() => sleep(100))
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"false"`)
   })
 })
 
@@ -1889,7 +1886,6 @@ describe('useSWR - local mutation', () => {
 })
 
 describe('useSWR - context configs', () => {
-
   it('mutate before mount should not block rerender', async () => {
     const prefetch = () => Promise.resolve('prefetch-data')
     const fetcher = () =>
