@@ -25,6 +25,7 @@ export interface ConfigInterface<
   ) => void
   isOnline?: () => boolean
   isDocumentVisible?: () => boolean
+  isPaused?: () => boolean
   onSuccess?: (
     data: Data,
     key: string,

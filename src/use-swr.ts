@@ -34,7 +34,7 @@ const IS_SERVER =
 
 // polyfill for requestAnimationFrame
 const rAF = IS_SERVER
-  ? () => {}
+  ? null
   : window['requestAnimationFrame'] || (f => setTimeout(f, 1))
 
 // React currently throws a warning when using useLayoutEffect on the server.
@@ -55,7 +55,7 @@ const MUTATION_END_TS: Record<string, number> = {}
 // generate strictly increasing timestamps
 const now = (() => {
   let ts = 0
-  return () => ts++
+  return () => ++ts
 })()
 
 setup({
@@ -383,8 +383,8 @@ function useSWR<Data = any, Error = any>(
     ): Promise<boolean> => {
       if (!key || !fn) return false
       if (unmountedRef.current) return false
+      if (configRef.current.isPaused()) return false
       const { retryCount = 0, dedupe = false } = revalidateOpts
-
       let loading = true
       let shouldDeduping =
         typeof CONCURRENT_PROMISES[key] !== 'undefined' && dedupe
@@ -442,34 +442,36 @@ function useSWR<Data = any, Error = any>(
           eventsRef.current.emit('onSuccess', newData, key, config)
         }
 
-        const shouldIgnoreRequest =
-          // if there're other ongoing request(s), started after the current one,
-          // we need to ignore the current one to avoid possible race conditions:
-          //   req1------------------>res1        (current one)
-          //        req2---------------->res2
-          // the request that fired later will always be kept.
-          CONCURRENT_PROMISES_TS[key] > startAt ||
-          // if there're other mutations(s), overlapped with the current revalidation:
-          // case 1:
-          //   req------------------>res
-          //       mutate------>end
-          // case 2:
-          //         req------------>res
-          //   mutate------>end
-          // case 3:
-          //   req------------------>res
-          //       mutate-------...---------->
-          // we have to ignore the revalidation result (res) because it's no longer fresh.
-          // meanwhile, a new revalidation should be triggered when the mutation ends.
-          (MUTATION_TS[key] &&
-            // case 1
-            (startAt <= MUTATION_TS[key] ||
-              // case 2
-              startAt <= MUTATION_END_TS[key] ||
-              // case 3
-              MUTATION_END_TS[key] === 0))
+        // if there're other ongoing request(s), started after the current one,
+        // we need to ignore the current one to avoid possible race conditions:
+        //   req1------------------>res1        (current one)
+        //        req2---------------->res2
+        // the request that fired later will always be kept.
+        if (CONCURRENT_PROMISES_TS[key] > startAt) {
+          return false
+        }
 
-        if (shouldIgnoreRequest) {
+        // if there're other mutations(s), overlapped with the current revalidation:
+        // case 1:
+        //   req------------------>res
+        //       mutate------>end
+        // case 2:
+        //         req------------>res
+        //   mutate------>end
+        // case 3:
+        //   req------------------>res
+        //       mutate-------...---------->
+        // we have to ignore the revalidation result (res) because it's no longer fresh.
+        // meanwhile, a new revalidation should be triggered when the mutation ends.
+        if (
+          MUTATION_TS[key] &&
+          // case 1
+          (startAt <= MUTATION_TS[key] ||
+            // case 2
+            startAt <= MUTATION_END_TS[key] ||
+            // case 3
+            MUTATION_END_TS[key] === 0)
+        ) {
           dispatch({ isValidating: false })
           return false
         }
@@ -503,6 +505,12 @@ function useSWR<Data = any, Error = any>(
       } catch (err) {
         delete CONCURRENT_PROMISES[key]
         delete CONCURRENT_PROMISES_TS[key]
+        if (configRef.current.isPaused()) {
+          dispatch({
+            isValidating: false
+          })
+          return false
+        }
 
         cache.set(keyErr, err)
 
@@ -678,7 +686,7 @@ function useSWR<Data = any, Error = any>(
         await revalidate({ dedupe: true })
       }
       // Read the latest refreshInterval
-      if (configRef.current.refreshInterval && !stateRef.current.error) {
+      if (configRef.current.refreshInterval && timer) {
         timer = setTimeout(tick, configRef.current.refreshInterval)
       }
     }
@@ -686,7 +694,10 @@ function useSWR<Data = any, Error = any>(
       timer = setTimeout(tick, configRef.current.refreshInterval)
     }
     return () => {
-      if (timer) clearTimeout(timer)
+      if (timer) {
+        clearTimeout(timer)
+        timer = null
+      }
     }
   }, [
     config.refreshInterval,

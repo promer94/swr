@@ -75,7 +75,8 @@ const defaultConfig = {
   isOnline: webPreset.isOnline,
   isDocumentVisible: webPreset.isDocumentVisible,
   setOnFocus: webPreset.setOnFocus,
-  setOnConnect: webPreset.setOnConnect
+  setOnConnect: webPreset.setOnConnect,
+  isPaused: () => false
 } as const
 
 export { cache }

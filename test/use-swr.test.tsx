@@ -221,7 +221,7 @@ describe('useSWR', () => {
     function useBroadcast3() {
       const { isValidating, revalidate } = useSWR(
         'broadcast-3',
-        () => new Promise(res => setTimeout(res, 100)),
+        () => sleep(100),
         {
           // need to turn of deduping otherwise
           // revalidating will be ignored
@@ -347,6 +347,32 @@ describe('useSWR', () => {
     expect(fetcher).toBeCalled()
 
     await screen.findByText('hello, SWR')
+  })
+
+  it('should use fetch api as default fetcher', async () => {
+    const users = [{ name: 'bob' }, { name: 'sue' }]
+    global['fetch'] = () => Promise.resolve()
+    const mockFetch = body =>
+      Promise.resolve({ json: () => Promise.resolve(body) } as any)
+    const fn = jest
+      .spyOn(window, 'fetch')
+      .mockImplementation(() => mockFetch(users))
+
+    function Users() {
+      const { data } = useSWR('http://localhost:3000/api/users')
+
+      return <div>hello, {data && data.map(u => u.name).join(' and ')}</div>
+    }
+
+    const { container } = render(<Users />)
+
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"hello, "`)
+    expect(fn).toBeCalled()
+    await waitForDomChange({ container })
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(
+      `"hello, bob and sue"`
+    )
+    delete global['fetch']
   })
 })
 
@@ -669,6 +695,54 @@ describe('useSWR - refresh', () => {
     })
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"1"`)
   })
+
+  it('should not let the previous interval timer to set new timer if key changes too fast', async () => {
+    const fetcherWithToken = jest.fn(async token => {
+      await sleep(200)
+      return token
+    })
+    function Page() {
+      const [count, setCount] = useState(0)
+      const { data } = useSWR(count.toString(), fetcherWithToken, {
+        refreshInterval: 100,
+        dedupingInterval: 50
+      })
+      return (
+        <button
+          onClick={() => setCount(count + 1)}
+        >{`click me ${data}`}</button>
+      )
+    }
+    const { container } = render(<Page />)
+
+    // initial revalidate
+    await act(() => sleep(200))
+    expect(fetcherWithToken).toBeCalledTimes(1)
+
+    // first refresh
+    await act(() => sleep(100))
+    expect(fetcherWithToken).toBeCalledTimes(2)
+    expect(fetcherWithToken).toHaveBeenLastCalledWith('0')
+    await act(() => sleep(200))
+
+    // second refresh start
+    await act(() => sleep(100))
+    expect(fetcherWithToken).toBeCalledTimes(3)
+    expect(fetcherWithToken).toHaveBeenLastCalledWith('0')
+    // change the key during revalidation
+    // The second refresh will not start a new timer
+    fireEvent.click(container.firstElementChild)
+
+    // first refresh with new key 1
+    await act(() => sleep(100))
+    expect(fetcherWithToken).toBeCalledTimes(4)
+    expect(fetcherWithToken).toHaveBeenLastCalledWith('1')
+    await act(() => sleep(210))
+
+    // second refresh with new key 1
+    expect(fetcherWithToken).toBeCalledTimes(5)
+    expect(fetcherWithToken).toHaveBeenLastCalledWith('1')
+  })
 })
 
 describe('useSWR - revalidate', () => {
@@ -719,6 +793,39 @@ describe('useSWR - revalidate', () => {
       return sleep(1)
     })
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"1, 1"`)
+  })
+
+  it('should respect sequences of revalidation calls (cope with race condition)', async () => {
+    let faster = false
+
+    function Page() {
+      const { data, revalidate } = useSWR(
+        'race',
+        () =>
+          new Promise(res => {
+            const value = faster ? 1 : 0
+            setTimeout(() => res(value), faster ? 100 : 200)
+          })
+      )
+
+      return <button onClick={revalidate}>{data}</button>
+    }
+
+    const { container } = render(<Page />)
+
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`""`)
+
+    // trigger the slower revalidation
+    faster = false
+    fireEvent.click(container.firstElementChild)
+
+    await act(async () => sleep(10))
+    // trigger the faster revalidation
+    faster = true
+    fireEvent.click(container.firstElementChild)
+
+    await act(async () => sleep(210))
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"1"`)
   })
 
   it('should respect sequences of revalidation calls (cope with race condition)', async () => {
@@ -1782,12 +1889,38 @@ describe('useSWR - local mutation', () => {
 })
 
 describe('useSWR - context configs', () => {
+
+  it('mutate before mount should not block rerender', async () => {
+    const prefetch = () => Promise.resolve('prefetch-data')
+    const fetcher = () =>
+      new Promise(resolve => {
+        setTimeout(() => resolve('data'), 100)
+      })
+    await act(() => mutate('prefetch', prefetch))
+
+    function Page() {
+      const { data } = useSWR('prefetch', fetcher)
+      return <div>{data}</div>
+    }
+
+    const { container } = render(<Page />)
+
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(
+      `"prefetch-data"`
+    )
+
+    await act(() => new Promise(res => setTimeout(res, 150)))
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data"`)
+  })
+})
+
+describe('useSWR - configs', () => {
   it('should read the config fallback from the context', async () => {
     let value = 0
     const fetcher = () => value++
 
     function Section() {
-      const { data } = useSWR('dynamic-10')
+      const { data } = useSWR('config-0')
       return <div>data: {data}</div>
     }
     function Page() {
@@ -1807,6 +1940,57 @@ describe('useSWR - context configs', () => {
     // mount
     await screen.findByText('data: 0')
     await act(() => sleep(110)) // update
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 1"`)
+  })
+
+  it('should stop revalidations when config.isPaused returns true', async () => {
+    const key = 'config-1'
+    let value = 0
+    const fetcher = () => {
+      if (value === 2) throw new Error()
+      return value++
+    }
+    const revalidate = () => mutate(key)
+
+    function Page() {
+      const [paused, setPaused] = useState(false)
+      const { data, error } = useSWR(key, fetcher, {
+        revalidateOnMount: true,
+        refreshInterval: 200,
+        isPaused() {
+          return paused
+        }
+      })
+
+      useEffect(() => {
+        // revalidate on mount and turn to idle
+        setPaused(true)
+      }, [])
+
+      return (
+        <div onClick={() => setPaused(!paused)}>
+          {error ? error : `data: ${data}`}
+        </div>
+      )
+    }
+    const { container } = render(<Page />)
+
+    await waitForDomChange({ container })
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 0"`)
+    await act(async () => await 0)
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 0"`)
+    revalidate()
+    await act(async () => await 0)
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 0"`)
+    revalidate()
+    fireEvent.click(container.firstElementChild)
+    await act(async () => await 0)
+    revalidate()
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 0"`)
+    await act(async () => await 0)
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 1"`)
+    fireEvent.click(container.firstElementChild)
+    await act(async () => await new Promise(res => setTimeout(res, 400)))
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 1"`)
   })
 })
@@ -2092,10 +2276,10 @@ describe('useSWR - key', () => {
       const key = `key-1-${mounted ? 'short' : 'long'}`
       const { data } = useSWR(key, async () => {
         if (mounted) {
-          await new Promise(res => setTimeout(res, 100))
+          await sleep(100)
           return 'short request'
         }
-        await new Promise(res => setTimeout(res, 200))
+        await sleep(200)
         return 'long request'
       })
       useEffect(() => setMounted(1), [])
@@ -2128,7 +2312,7 @@ describe('useSWR - key', () => {
       const [mounted, setMounted] = useState(false)
       const key = `key-${mounted ? '1' : '0'}`
       const { data } = useSWR(key, async k => {
-        await new Promise(res => setTimeout(res, 200))
+        await sleep(200)
         return k
       })
       useEffect(() => {
@@ -2259,7 +2443,6 @@ describe('useSWR - key', () => {
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"true"`)
     fireEvent.click(container.firstElementChild)
     await act(() => sleep(10))
-    await new Promise(r => setTimeout(r, 10))
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"false"`)
   })
 })
