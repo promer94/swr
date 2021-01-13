@@ -1,5 +1,7 @@
 const isWindowEventTarget =
-  typeof window !== 'undefined' && window.addEventListener
+  typeof window !== 'undefined' &&
+  window.addEventListener &&
+  document.addEventListener
 
 function isOnline(): boolean {
   if (
@@ -27,13 +29,13 @@ const fetcher = (url: any) => fetch(url).then(res => res.json())
 
 function setOnFocus(callback: (...args: unknown[]) => void) {
   if (!isWindowEventTarget) return
-  window.addEventListener('focus', callback, false)
-  window.addEventListener('visibilitychange', callback, false)
+  document.addEventListener('focus', callback, false)
+  document.addEventListener('visibilitychange', callback, false)
 }
 
 function setOnConnect(callback: (...args: unknown[]) => void) {
   if (!isWindowEventTarget) return
-  window.addEventListener('online', callback, false)
+  document.addEventListener('online', callback, false)
 }
 
 export default {
