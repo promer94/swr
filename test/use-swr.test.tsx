@@ -1154,7 +1154,7 @@ describe('useSWR - focus', () => {
     // mount
     await screen.findByText('data: 0')
     // trigger revalidation
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(1)
     })
@@ -1178,7 +1178,7 @@ describe('useSWR - focus', () => {
     // mount
     await screen.findByText('data: 0')
     // trigger revalidation
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(1)
     })
@@ -1204,7 +1204,7 @@ describe('useSWR - focus', () => {
     await screen.findByText('data: 0')
 
     // trigger revalidation
-    fireEvent.focus(window)
+    fireEvent.focus(document)
 
     await act(() => {
       return sleep(1)
@@ -1215,7 +1215,7 @@ describe('useSWR - focus', () => {
     // change revalidateOnFocus to true
     fireEvent.click(container.firstElementChild)
     // trigger revalidation
-    fireEvent.focus(window)
+    fireEvent.focus(document)
 
     await act(() => {
       return sleep(1)
@@ -1223,7 +1223,7 @@ describe('useSWR - focus', () => {
     // data should update
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 1"`)
     // trigger revalidation
-    fireEvent.focus(window)
+    fireEvent.focus(document)
 
     await act(() => {
       return sleep(1)
@@ -1234,7 +1234,7 @@ describe('useSWR - focus', () => {
     // change revalidateOnFocus to false
     fireEvent.click(container.firstElementChild)
     // trigger revalidation
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(1)
     })
@@ -1264,17 +1264,17 @@ describe('useSWR - focus', () => {
     // mount
     await screen.findByText('data: 0')
     // trigger revalidation
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(1)
     })
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(210)
     })
 
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 1"`)
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(1)
     })
@@ -1305,22 +1305,22 @@ describe('useSWR - focus', () => {
     // mount
     await screen.findByText('data: 0')
 
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(210)
     })
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(210)
     })
 
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 2"`)
     fireEvent.click(container.firstElementChild)
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(1)
     })
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(210)
     })
@@ -1330,11 +1330,11 @@ describe('useSWR - focus', () => {
     await act(() => {
       return sleep(100)
     })
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(310)
     })
-    fireEvent.focus(window)
+    fireEvent.focus(document)
     await act(() => {
       return sleep(1)
     })

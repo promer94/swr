@@ -1,79 +1,184 @@
-import { act, render, screen } from '@testing-library/react'
-import React from 'react'
-import useSWR, { mutate, cache } from '../src'
-import Cache from '../src/cache'
+import { act, fireEvent, render, screen } from '@testing-library/react'
+import React, { useState, useEffect } from 'react'
+import useSWR from '../src'
+import { sleep } from './utils'
 
-describe('useSWR - cache', () => {
-  it('should not react to direct cache updates but mutate', async () => {
-    cache.set('cache-1', 'custom cache message')
+describe('useSWR - key', () => {
+  it('should respect requests after key has changed', async () => {
+    let rerender
 
     function Page() {
-      const { data } = useSWR('cache-1', () => 'random message', {
-        suspense: true
+      const [mounted, setMounted] = useState(0)
+      const key = `key-1-${mounted ? 'short' : 'long'}`
+      const { data } = useSWR(key, async () => {
+        if (mounted) {
+          await sleep(100)
+          return 'short request'
+        }
+        await sleep(200)
+        return 'long request'
       })
+      useEffect(() => setMounted(1), [])
+      rerender = setMounted
+
       return <div>{data}</div>
     }
 
-    // render using custom cache
-    const { queryByText } = render(
-      <React.Suspense fallback={null}>
-        <Page />
-      </React.Suspense>
+    const { container } = render(<Page />)
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`""`)
+
+    await screen.findByText('short request')
+
+    await act(() => sleep(110)) // wait 100ms until "long request" finishes
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(
+      `"short request"`
+    ) // should be "short request" still
+
+    // manually trigger a re-render from outside
+    // this triggers a re-render, and a read access to `swr.data`
+    // but the result should still be "short request"
+    act(() => rerender(x => x + 1))
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(
+      `"short request"`
     )
-
-    // content should come from custom cache
-    expect(queryByText('custom cache message')).toMatchInlineSnapshot(`
-      <div>
-        custom cache message
-      </div>
-    `)
-
-    // content should be updated with fetcher results
-    expect(await screen.findByText('random message')).toMatchInlineSnapshot(`
-      <div>
-        random message
-      </div>
-    `)
-    const value = 'a different message'
-    act(() => {
-      cache.set('cache-1', value)
-    })
-    await act(async () => mutate('cache-1', value, false))
-
-    // content should be updated from new cache value, after mutate without revalidate
-    expect(await screen.findByText('a different message'))
-      .toMatchInlineSnapshot(`
-      <div>
-        a different message
-      </div>
-    `)
-    act(() => {
-      cache.delete('cache-1')
-    })
-    await act(() => mutate('cache-1'))
-
-    // content should go back to be the fetched value
-    expect(await screen.findByText('random message')).toMatchInlineSnapshot(`
-      <div>
-        random message
-      </div>
-    `)
   })
 
-  it('should notify subscribers when a cache item changed', async () => {
-    // create new cache instance to don't get affected by other tests
-    // updating the normal cache instance
-    const tmpCache = new Cache()
+  it('should render undefined after key has changed', async () => {
+    function Page() {
+      const [mounted, setMounted] = useState(false)
+      const key = `key-${mounted ? '1' : '0'}`
+      const { data } = useSWR(key, async k => {
+        await sleep(200)
+        return k
+      })
+      useEffect(() => {
+        setTimeout(() => setMounted(true), 320)
+      }, [])
+      return <div>{data}</div>
+    }
 
-    const listener = jest.fn()
-    const unsubscribe = tmpCache.subscribe(listener)
-    tmpCache.set('cache-2', 'random message')
+    //    time     data       key
+    // -> 0        undefined, '0'
+    // -> 200      0,         '0'
+    // -> 320      undefined, '1' <- this state is required; we can't show 0 here
+    // -> 520      1,         '1'
+    const { container } = render(<Page />)
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`""`) // undefined, time=0
+    await act(() => sleep(210))
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"key-0"`) // 0, time=210
+    await act(() => sleep(200))
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`""`) // undefined, time=410
+    await act(() => sleep(140))
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"key-1"`) // 1, time=550
+  })
 
-    expect(listener).toHaveBeenCalled()
+  it('should return undefined after key change when fetcher is synchronized', async () => {
+    const samples = {
+      '1': 'a',
+      '2': 'b',
+      '3': 'c'
+    }
 
-    unsubscribe()
-    tmpCache.set('cache-2', 'a different message')
+    function Page() {
+      const [sampleKey, setKey] = React.useState(1)
+      const { data } = useSWR(
+        `key-2-${sampleKey}`,
+        key => samples[key.replace('key-2-', '')]
+      )
+      return (
+        <div
+          onClick={() => {
+            setKey(sampleKey + 1)
+          }}
+        >
+          hello, {sampleKey}:{data}
+        </div>
+      )
+    }
+    const { container } = render(<Page />)
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(
+      `"hello, 1:"`
+    )
 
-    expect(listener).toHaveBeenCalledTimes(1)
+    await screen.findByText('hello, 1:a')
+
+    fireEvent.click(container.firstElementChild)
+    // first rerender on key change
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(
+      `"hello, 2:"`
+    )
+    await act(() => sleep(100))
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(
+      `"hello, 2:b"`
+    )
+  })
+
+  it('should revalidate if a function key changes identity', async () => {
+    const closureFunctions: { [key: string]: () => Promise<string> } = {}
+
+    const closureFactory = id => {
+      if (closureFunctions[id]) return closureFunctions[id]
+      closureFunctions[id] = () => Promise.resolve(`data-${id}`)
+      return closureFunctions[id]
+    }
+
+    let updateId
+
+    const fetcher = fn => fn()
+
+    function Page() {
+      const [id, setId] = React.useState('first')
+      updateId = setId
+      const fnWithClosure = closureFactory(id)
+      const { data } = useSWR([fnWithClosure], fetcher)
+
+      return <div>{data}</div>
+    }
+
+    const { container } = render(<Page />)
+    const closureSpy = jest.spyOn(closureFunctions, 'first')
+
+    await screen.findByText('data-first')
+    expect(closureSpy).toHaveBeenCalledTimes(1)
+
+    // update, but don't change the id.
+    // Function identity should stay the same, and useSWR should not call the function again.
+    act(() => updateId('first'))
+    await act(async () => await 0)
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(
+      `"data-first"`
+    )
+    expect(closureSpy).toHaveBeenCalledTimes(1)
+
+    act(() => updateId('second'))
+    await act(async () => await 0)
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(
+      `"data-second"`
+    )
+  })
+
+  it('should cleanup state when key turns to empty', async () => {
+    function Page() {
+      const [cnt, setCnt] = useState(1)
+      const { isValidating } = useSWR(
+        cnt === -1 ? '' : `key-empty-${cnt}`,
+        () => new Promise(r => setTimeout(r, 1000))
+      )
+
+      return (
+        <div onClick={() => setCnt(cnt == 2 ? -1 : cnt + 1)}>
+          {isValidating ? 'true' : 'false'}
+        </div>
+      )
+    }
+
+    const { container } = render(<Page />)
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"true"`)
+    fireEvent.click(container.firstElementChild)
+    await act(() => sleep(10))
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"true"`)
+    fireEvent.click(container.firstElementChild)
+    await act(() => sleep(10))
+    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"false"`)
   })
 })

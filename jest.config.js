@@ -7,5 +7,6 @@ module.exports = {
         warnOnly: true
       } */
     }
-  }
+  },
+  modulePathIgnorePatterns: ['<rootDir>/examples/']
 }
