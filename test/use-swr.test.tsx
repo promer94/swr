@@ -1,10 +1,4 @@
-import {
-  act,
-  fireEvent,
-  render,
-  waitForDomChange,
-  screen
-} from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import React, { ReactNode, Suspense, useEffect, useState } from 'react'
 import useSWR, { mutate, SWRConfig, cache } from '../src'
 import Cache from '../src/cache'
@@ -368,10 +362,8 @@ describe('useSWR', () => {
 
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"hello, "`)
     expect(fn).toBeCalled()
-    await waitForDomChange({ container })
-    expect(container.firstChild.textContent).toMatchInlineSnapshot(
-      `"hello, bob and sue"`
-    )
+
+    await screen.findByText('hello, bob and sue')
     delete global['fetch']
   })
 })
@@ -1159,8 +1151,6 @@ describe('useSWR - focus', () => {
 
     // hydration
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: "`)
-    await waitForDomChange({ container }) // mount
-    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 0"`)
     // mount
     await screen.findByText('data: 0')
     // trigger revalidation
@@ -1971,8 +1961,7 @@ describe('useSWR - configs', () => {
     }
     const { container } = render(<Page />)
 
-    await waitForDomChange({ container })
-    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 0"`)
+    screen.findByText('data: 0')
     await act(async () => await 0)
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 0"`)
     revalidate()
@@ -1986,7 +1975,7 @@ describe('useSWR - configs', () => {
     await act(async () => await 0)
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 1"`)
     fireEvent.click(container.firstElementChild)
-    await act(async () => await new Promise(res => setTimeout(res, 400)))
+    await act(async () => sleep(400))
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 1"`)
   })
 })
@@ -2521,10 +2510,8 @@ describe('useSWR - config callbacks', () => {
       `"hello, , a"`
     )
     expect(state).toEqual(null)
+    await screen.findByText('Error: 0')
 
-    await waitForDomChange({ container })
-
-    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"Error: 0"`)
     expect(state).toEqual('a')
 
     // props changed, but the onError callback doese not trigger yet.
