@@ -25,6 +25,7 @@ type SWRInfiniteResponseInterface<Data = any, Error = any> = responseInterface<
 > & {
   size: number
   setSize: (
+    // eslint-disable-next-line no-shadow
     size: number | ((size: number) => number)
   ) => Promise<Data[] | undefined>
 }

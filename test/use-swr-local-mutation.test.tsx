@@ -154,7 +154,7 @@ describe('useSWR - local mutation', () => {
 
     //mount
     await screen.findByText('data: 0')
-
+    await act(() => sleep(1))
     await act(() => {
       // mutate and revalidate
       return mutate(

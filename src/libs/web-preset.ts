@@ -25,15 +25,16 @@ function isDocumentVisible(): boolean {
   return true
 }
 
-const fetcher = (url: any) => fetch(url).then(res => res.json())
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+const fetcher = (url: any) => fetch(url).then<any>(res => res.json())
 
-function setOnFocus(callback: (...args: unknown[]) => void) {
+function setOnFocus(callback: (...args: unknown[]) => void): void {
   if (!isWindowEventTarget) return
   document.addEventListener('focus', callback, false)
   document.addEventListener('visibilitychange', callback, false)
 }
 
-function setOnConnect(callback: (...args: unknown[]) => void) {
+function setOnConnect(callback: (...args: unknown[]) => void): void {
   if (!isWindowEventTarget) return
   document.addEventListener('online', callback, false)
 }

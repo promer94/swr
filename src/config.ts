@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* TODO: use @ts-expect-error after upgrading typescript verison */
 import { dequal } from 'dequal/lite'
 import {

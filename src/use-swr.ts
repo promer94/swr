@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
 /* TODO: use @ts-expect-error after upgrading typescript */
 import {
   useCallback,
@@ -34,7 +33,8 @@ const IS_SERVER =
 
 // polyfill for requestAnimationFrame
 const rAF = IS_SERVER
-  ? () => {}
+  ? // eslint-disable-next-line @typescript-eslint/no-empty-function
+    () => {}
   : window['requestAnimationFrame'] || (f => setTimeout(f, 1))
 
 // React currently throws a warning when using useLayoutEffect on the server.
@@ -299,7 +299,7 @@ function useSWR<Data = any, Error = any>(
   // display the data label in the React DevTools next to SWR hooks
   useDebugValue(stateRef.current.data)
 
-  const [, rerender] = useState<{}>({})
+  const [, rerender] = useState<unknown>({})
   let dispatch = useCallback(
     (payload: actionType<Data, Error>) => {
       let shouldUpdateState = false

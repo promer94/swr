@@ -19,12 +19,11 @@ describe('useSWR - focus', () => {
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: "`)
     // mount
     await screen.findByText('data: 0')
+
+    await act(() => sleep(1))
     // trigger revalidation
     fireEvent.focus(document)
-    await act(() => {
-      return sleep(1)
-    })
-    expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 1"`)
+    await screen.findByText('data: 1')
   })
 
   it("shouldn't revalidate on focus when revalidateOnFocus is false", async () => {
@@ -69,6 +68,8 @@ describe('useSWR - focus', () => {
     // mount
     await screen.findByText('data: 0')
 
+    await act(() => sleep(1))
+
     // trigger revalidation
     fireEvent.focus(document)
 
@@ -78,6 +79,7 @@ describe('useSWR - focus', () => {
     // data should not change
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 0"`)
 
+    await act(() => sleep(1))
     // change revalidateOnFocus to true
     fireEvent.click(container.firstElementChild)
     // trigger revalidation

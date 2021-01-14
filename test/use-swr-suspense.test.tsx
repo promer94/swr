@@ -94,6 +94,7 @@ describe('useSWR - suspense', () => {
     await screen.findByText('hello')
   })
   it('should throw errors', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     jest.spyOn(console, 'error').mockImplementation(() => {})
     function Section() {
       const { data } = useSWR(

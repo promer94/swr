@@ -3,9 +3,10 @@ module.exports = {
   testRegex: '/test/.*\\.test\\.tsx$',
   globals: {
     'ts-jest': {
-      diagnostics: false /**{
-        warnOnly: true
-      } */
+      diagnostics: {
+        warnOnly: true,
+        ignoreCodes: ['TS2531']
+      }
     }
   },
   modulePathIgnorePatterns: ['<rootDir>/examples/']

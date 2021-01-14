@@ -64,7 +64,7 @@ describe('useSWR - configs', () => {
     }
     const { container } = render(<Page />)
 
-    screen.findByText('data: 0')
+    await screen.findByText('data: 0')
     await act(async () => await 0)
     expect(container.firstChild.textContent).toMatchInlineSnapshot(`"data: 0"`)
     revalidate()
