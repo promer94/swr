@@ -299,29 +299,34 @@ function useSWR<Data = any, Error = any>(
   // display the data label in the React DevTools next to SWR hooks
   useDebugValue(stateRef.current.data)
 
-  const rerender = useState<unknown>(null)[1]
-  let dispatch = useCallback((payload: actionType<Data, Error>) => {
-    let shouldUpdateState = false
-    for (let k in payload) {
-      // @ts-ignore
-      if (stateRef.current[k] === payload[k]) {
-        continue
+  const [, rerender] = useState<{}>({})
+  let dispatch = useCallback(
+    (payload: actionType<Data, Error>) => {
+      let shouldUpdateState = false
+      for (let k in payload) {
+        // @ts-ignore
+        if (stateRef.current[k] === payload[k]) {
+          continue
+        }
+        // @ts-ignore
+        stateRef.current[k] = payload[k]
+        // @ts-ignore
+        if (stateDependencies.current[k]) {
+          shouldUpdateState = true
+        }
       }
-      // @ts-ignore
-      stateRef.current[k] = payload[k]
-      // @ts-ignore
-      if (stateDependencies.current[k]) {
-        shouldUpdateState = true
-      }
-    }
 
-    if (shouldUpdateState || config.suspense) {
-      // if component is unmounted, should skip rerender
-      // if component is not mounted, should skip rerender
-      if (unmountedRef.current || !initialMountedRef.current) return
-      rerender({})
-    }
-  }, [])
+      if (shouldUpdateState || config.suspense) {
+        // if component is unmounted, should skip rerender
+        // if component is not mounted, should skip rerender
+        if (unmountedRef.current || !initialMountedRef.current) return
+        rerender({})
+      }
+    },
+    // config.suspense isn't allowed to change during the lifecycle
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
 
   // error ref inside revalidate (is last request errored?)
   const unmountedRef = useRef(false)
@@ -579,7 +584,7 @@ function useSWR<Data = any, Error = any>(
       config.revalidateOnMount ||
       (!config.initialData && config.revalidateOnMount === undefined)
     ) {
-      if (typeof latestKeyedData !== 'undefined') {
+      if (typeof latestKeyedData !== 'undefined' && !IS_SERVER) {
         // delay revalidate if there's cache
         // to not block the rendering
         rAF(softRevalidate)
