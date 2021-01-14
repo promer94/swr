@@ -488,7 +488,7 @@ describe('useSWRInfinite', () => {
     fireEvent.click(container.firstElementChild)
 
     // Should this reuse the cached data for `page=1`?
+    await screen.findByText('page-1-1, page-1-2, page-2-1, page-2-2')
     expect(requests).toEqual(['/api?page=1', '/api?page=2'])
-    await screen.findByText(`"page-1-1, page-1-2, page-2-1, page-2-2"`)
   })
 })
