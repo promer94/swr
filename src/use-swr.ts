@@ -112,7 +112,6 @@ async function mutate<Data = any>(
 
   // track timestamps before await asynchronously
   const beforeMutationTs = MUTATION_TS[key]
-  const beforeConcurrentPromisesTs = CONCURRENT_PROMISES_TS[key]
 
   let data: any, error: unknown
   let isAsyncMutation = false
@@ -142,10 +141,7 @@ async function mutate<Data = any>(
 
   const shouldAbort = (): boolean | void => {
     // check if other mutations have occurred since we've started this mutation
-    if (
-      beforeMutationTs !== MUTATION_TS[key] ||
-      beforeConcurrentPromisesTs !== CONCURRENT_PROMISES_TS[key]
-    ) {
+    if (beforeMutationTs !== MUTATION_TS[key]) {
       if (error) throw error
       return true
     }
@@ -154,7 +150,7 @@ async function mutate<Data = any>(
   // if there's a race we don't update cache or broadcast change, just return the data
   if (shouldAbort()) return data
 
-  if (typeof data !== 'undefined') {
+  if (data !== undefined) {
     // update cached data
     cache.set(key, data)
   }
@@ -330,7 +326,7 @@ function useSWR<Data = any, Error = any>(
         }
 
         let newData: Data
-        let startAt
+        let startAt: number
 
         if (shouldDeduping) {
           // there's already an ongoing request,
@@ -358,8 +354,11 @@ function useSWR<Data = any, Error = any>(
           newData = await CONCURRENT_PROMISES[key]
 
           setTimeout(() => {
-            delete CONCURRENT_PROMISES[key]
-            delete CONCURRENT_PROMISES_TS[key]
+            // CONCURRENT_PROMISES_TS[key] maybe be `undefined` or a number
+            if (CONCURRENT_PROMISES_TS[key] === startAt) {
+              delete CONCURRENT_PROMISES[key]
+              delete CONCURRENT_PROMISES_TS[key]
+            }
           }, config.dedupingInterval)
 
           // trigger the success event,
@@ -372,7 +371,8 @@ function useSWR<Data = any, Error = any>(
         //   req1------------------>res1        (current one)
         //        req2---------------->res2
         // the request that fired later will always be kept.
-        if (CONCURRENT_PROMISES_TS[key] > startAt) {
+        // CONCURRENT_PROMISES_TS[key] maybe be `undefined` or a number
+        if (CONCURRENT_PROMISES_TS[key] !== startAt) {
           return false
         }
 
@@ -389,7 +389,7 @@ function useSWR<Data = any, Error = any>(
         // we have to ignore the revalidation result (res) because it's no longer fresh.
         // meanwhile, a new revalidation should be triggered when the mutation ends.
         if (
-          MUTATION_TS[key] &&
+          MUTATION_TS[key] !== undefined &&
           // case 1
           (startAt <= MUTATION_TS[key] ||
             // case 2
