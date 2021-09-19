@@ -13,11 +13,12 @@ export type Fetcher<
   ? (...args: [string]) => Result<Data>
   : Args extends string | null
   ? (...args: [string]) => Result<Data>
-  : Args extends () => Record<infer K, infer V>
-  ? (...args: [Record<K, V>]) => Result<Data>
-  : Args extends Record<infer K, infer V>
-  ? (...args: [Record<K, V>]) => Result<Data>
-  : never
+  : Args extends () => infer R
+  ? R extends Record<any, any>
+    ? (...args: [R]) => Result<Data>
+    : never
+  : // FIXME Need a batter way to support object key
+    (...args: any[]) => Result<Data>
 
 // Configuration types that are only used internally, not exposed to the user.
 export interface InternalConfiguration {

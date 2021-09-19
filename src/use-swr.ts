@@ -175,7 +175,6 @@ export const useSWRHandler = <Data = any, Error = any>(
 
           // Start the request and keep the timestamp.
           CONCURRENT_PROMISES_TS[key] = startAt = getTimestamp()
-          // @ts-ignore FIXME When September ends
           newData = await (CONCURRENT_PROMISES[key] = fn(...fnArgs))
 
           setTimeout(() => {

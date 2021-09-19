@@ -31,6 +31,7 @@ describe('useSWR fetcher type', () => {
       }
       const fetcher: (args: typeof key) => Promise<typeof key> = args =>
         createResponse(args, { delay: 100 })
+
       const { data } = useSWR(key, fetcher)
       return <div>data:{data}</div>
     }
@@ -130,11 +131,12 @@ describe('swr/infinite fetcher type', () => {
         foo: createKey(),
         bar: 2
       })
-      const fetcher: (
-        args: ReturnType<typeof key>
-      ) => Promise<ReturnType<typeof key>> = args =>
-        createResponse(args, { delay: 100 })
-      const { data } = useSWRInfinite(key, fetcher)
+
+      const { data } = useSWRInfinite(key, args => {
+        console.log(args.foo.toLowerCase())
+        console.log(args.bar.toFixed())
+        return args
+      })
       return <div>data:{data}</div>
     }
     renderWithConfig(<Page />)

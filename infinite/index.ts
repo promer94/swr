@@ -253,8 +253,8 @@ type Fetcher<Data = unknown, Args extends ValueKey = ValueKey> = Args extends
   ? (...args: [R, ...K]) => Result<Data>
   : Args extends string | null
   ? (...args: [string]) => Result<Data>
-  : Args extends Record<infer K, infer V>
-  ? (...args: [Record<K, V>]) => Result<Data>
+  : Args extends Record<any, any>
+  ? (...args: [Args]) => Result<Data>
   : never
 
 interface SWRInfiniteHook {
