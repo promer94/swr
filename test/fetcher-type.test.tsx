@@ -1,7 +1,9 @@
 import React from 'react'
 import useSWR from 'swr'
-import { createKey, createResponse, renderWithConfig } from './utils'
+import { createKey, createResponse } from './utils'
 import useSWRInfinite from 'swr/infinite'
+
+function doNothing(_: any) {}
 describe('useSWR fetcher type', () => {
   it('key = string', async () => {
     function Page() {
@@ -11,7 +13,7 @@ describe('useSWR fetcher type', () => {
       const { data } = useSWR(key, fetcher)
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
   it('key = () => string', async () => {
     function Page() {
@@ -21,7 +23,7 @@ describe('useSWR fetcher type', () => {
       const { data } = useSWR(key, fetcher)
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
   it('key = Record<any, any>', async () => {
     function Page() {
@@ -35,7 +37,7 @@ describe('useSWR fetcher type', () => {
       const { data } = useSWR(key, fetcher)
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
   it('key = () => Record<any, any>', async () => {
     function Page() {
@@ -50,7 +52,7 @@ describe('useSWR fetcher type', () => {
       const { data } = useSWR(key, fetcher)
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
   it('key = Tuple', async () => {
     function Page() {
@@ -65,7 +67,7 @@ describe('useSWR fetcher type', () => {
       )
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
   it('key = () => Tuple', async () => {
     function Page() {
@@ -80,7 +82,7 @@ describe('useSWR fetcher type', () => {
       )
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
   it('key = readonly Tuple', async () => {
     function Page() {
@@ -95,7 +97,7 @@ describe('useSWR fetcher type', () => {
       )
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
   it('key = () => readonly Tuple', async () => {
     function Page() {
@@ -111,7 +113,7 @@ describe('useSWR fetcher type', () => {
       )
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
 })
 describe('swr/infinite fetcher type', () => {
@@ -123,7 +125,7 @@ describe('swr/infinite fetcher type', () => {
       const { data } = useSWR(key, fetcher)
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
   it('key = () => Record<any, any>', async () => {
     function Page() {
@@ -139,7 +141,7 @@ describe('swr/infinite fetcher type', () => {
       })
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
   it('key = () => Tuple', async () => {
     function Page() {
@@ -154,7 +156,7 @@ describe('swr/infinite fetcher type', () => {
       )
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
   it('key = () => readonly Tuple', async () => {
     function Page() {
@@ -170,6 +172,6 @@ describe('swr/infinite fetcher type', () => {
       )
       return <div>data:{data}</div>
     }
-    renderWithConfig(<Page />)
+    doNothing(<Page />)
   })
 })
