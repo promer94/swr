@@ -12,5 +12,12 @@
     "clean": {
       "cache": false
     }
-  }
+  },
+  "globalDependencies": [
+    "tsconfig.json",
+    "_internal/utils/**",
+    "_internal/index.ts",
+    "_internal/types.ts",
+    "_internal/constants.ts"
+  ]
 }
