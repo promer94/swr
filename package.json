@@ -79,7 +79,7 @@
     "build:internal": "turbo run build --filter=swr-internal",
     "prepublishOnly": "pnpm clean && pnpm build",
     "publish-beta": "pnpm publish --tag beta",
-    "types:check": "tsc --noEmit --project tsconfig.check.json",
+    "types:check": "turbo run types:check",
     "format": "prettier --write ./**/*.{ts,tsx}",
     "lint": "eslint . --ext .ts,.tsx --cache",
     "lint:fix": "pnpm lint --fix",
