@@ -5,6 +5,13 @@
   "module": "./dist/index.esm.js",
   "types": "./dist/_internal",
   "exports": "./dist/index.mjs",
+  "scripts": {
+    "watch": "bunchee index.ts --no-sourcemap -w",
+    "build": "bunchee index.ts --no-sourcemap"
+  },
+  "devDependencies": {
+    "bunchee": "1.8.3"
+  },
   "peerDependencies": {
     "react": "*"
   }
