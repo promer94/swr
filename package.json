@@ -87,7 +87,8 @@
     "lint:fix": "pnpm lint --fix",
     "coverage": "jest --coverage",
     "test-typing": "tsc --noEmit -p test/type/tsconfig.json && tsc --noEmit -p test/tsconfig.json",
-    "test": "jest"
+    "test": "tsc --noEmit -p test && jest",
+    "test-ct": "rimraf playwright/.cache && playwright test -c playwright-ct.config.ts"
   },
   "husky": {
     "hooks": {
@@ -102,10 +103,11 @@
     ]
   },
   "devDependencies": {
-    "@swc/core": "1.2.186",
-    "@swc/jest": "0.2.21",
+    "@playwright/experimental-ct-react": "^1.24.1",
+    "@playwright/test": "^1.24.1",
+    "@swc/core": "1.2.220",
+    "@swc/jest": "0.2.22",
     "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.1.1",
     "@type-challenges/utils": "0.1.1",
     "@types/jest": "^27.5.1",
     "@types/node": "^17.0.34",
@@ -124,10 +126,10 @@
     "jest": "28.1.0",
     "jest-environment-jsdom": "28.1.0",
     "lint-staged": "8.2.1",
-    "next": "^12.1.6",
+    "next": "^12.2.3",
     "prettier": "2.6.2",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "rimraf": "3.0.2",
     "swr": "workspace:*",
     "tslib": "2.4.0",
@@ -148,6 +150,7 @@
     "pnpm": "7"
   },
   "dependencies": {
+    "@testing-library/react": "^13.3.0",
     "use-sync-external-store": "^1.2.0"
   }
 }
