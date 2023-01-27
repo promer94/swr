@@ -77,7 +77,7 @@
     "csb:install": "pnpm install",
     "csb:build": "pnpm build",
     "watch": "tsup --watch",
-    "build": "tsup --spilting",
+    "build": "tsup --splitting",
     "types:check": "tsc --noEmit",
     "test-typing": "tsc --noEmit -p test/type/tsconfig.json && tsc --noEmit -p test/tsconfig.json",
     "prepublishOnly": "pnpm build && pnpm test-packaging",
