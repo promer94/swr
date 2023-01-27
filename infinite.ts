@@ -12,14 +12,14 @@ import {
   useIsomorphicLayoutEffect,
   serialize,
   withMiddleware
-} from 'swr/_internal'
+} from './_internal'
 import type {
   BareFetcher,
   SWRHook,
   MutatorCallback,
   Middleware,
   MutatorOptions
-} from 'swr/_internal'
+} from './_internal'
 import type {
   SWRInfiniteConfiguration,
   SWRInfiniteResponse,

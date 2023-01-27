@@ -21,7 +21,7 @@ import {
   internalMutate,
   revalidateEvents,
   mergeObjects
-} from 'swr/_internal'
+} from './_internal'
 import type {
   State,
   Fetcher,
@@ -34,7 +34,7 @@ import type {
   RevalidateEvent,
   StateDependencies,
   GlobalState
-} from 'swr/_internal'
+} from './_internal'
 
 const WITH_DEDUPE = { dedupe: true }
 
@@ -666,7 +666,7 @@ export const unstable_serialize = (key: Key) => serialize(key)[0]
  */
 export default withArgs<SWRHook>(useSWRHandler)
 
-export { useSWRConfig, mutate, preload } from 'swr/_internal'
+export { useSWRConfig, mutate, preload } from './_internal'
 
 // Types
 export type {

@@ -1,6 +1,6 @@
-import type { Middleware } from 'swr/_internal'
+import type { Middleware } from './_internal'
 import useSWR from 'swr'
-import { withMiddleware } from 'swr/_internal'
+import { withMiddleware } from './_internal'
 
 export const immutable: Middleware = useSWRNext => (key, fetcher, config) => {
   // Always override all revalidate options.
