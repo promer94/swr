@@ -1,4 +1,4 @@
-import { useCallback, useRef, useDebugValue, useMemo } from 'react'
+import React, { useCallback, useRef, useDebugValue, useMemo } from 'react'
 import { useSyncExternalStore } from 'use-sync-external-store/shim/index.js'
 
 import {
@@ -178,7 +178,13 @@ export const useSWRHandler = <Data = any, Error = any>(
         subscribeCache(
           key,
           (current: State<Data, any>, prev: State<Data, any>) => {
-            if (!isEqual(prev, current)) callback()
+            if (!isEqual(prev, current)) {
+              if (IS_REACT_LEGACY) {
+                callback()
+              } else {
+                React.startTransition(callback)
+              }
+            }
           }
         ),
       // eslint-disable-next-line react-hooks/exhaustive-deps
