@@ -11,40 +11,40 @@
     "fetch"
   ],
   "packageManager": "pnpm@7.1.0",
-  "main": "./dist/core/index.js",
-  "module": "./dist/core/index.mjs",
-  "types": "./dist/core/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
     ".": {
-      "types": "./dist/core/index.d.ts",
-      "import": "./dist/core/index.mjs",
-      "module": "./dist/core/index.mjs",
-      "require": "./dist/core/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "module": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./infinite": {
-      "types": "./dist/infinite/index.d.ts",
-      "import": "./dist/infinite/index.mjs",
-      "module": "./dist/infinite/index.mjs",
-      "require": "./dist/infinite/index.js"
+      "types": "./dist/infinite.d.ts",
+      "import": "./dist/infinite.mjs",
+      "module": "./dist/infinite.mjs",
+      "require": "./dist/infinite.js"
     },
     "./immutable": {
-      "types": "./dist/immutable/index.d.ts",
-      "import": "./dist/immutable/index.mjs",
-      "module": "./dist/immutable/index.mjs",
-      "require": "./dist/immutable/index.js"
+      "types": "./dist/immutable.d.ts",
+      "import": "./dist/immutable.mjs",
+      "module": "./dist/immutable.mjs",
+      "require": "./dist/immutable.js"
     },
     "./mutation": {
-      "types": "./dist/mutation/index.d.ts",
-      "import": "./dist/mutation/index.mjs",
-      "module": "./dist/mutation/index.mjs",
-      "require": "./dist/mutation/index.js"
+      "types": "./dist/mutation.d.ts",
+      "import": "./dist/mutation.mjs",
+      "module": "./dist/mutation.mjs",
+      "require": "./dist/mutation.js"
     },
     "./_internal": {
-      "types": "./dist/_internal/index.d.ts",
-      "import": "./dist/_internal/index.mjs",
-      "module": "./dist/_internal/index.mjs",
-      "require": "./dist/_internal/index.js"
+      "types": "./dist/_internal.d.ts",
+      "import": "./dist/_internal.mjs",
+      "module": "./dist/_internal.mjs",
+      "require": "./dist/_internal.js"
     }
   },
   "files": [
@@ -58,7 +58,8 @@
     "csb:install": "pnpm install",
     "csb:build": "pnpm build",
     "watch": "tsup --watch",
-    "build": "tsup --splitting",
+    "bunchee": "bunchee --externals swr/_internal",
+    "tsup": "tsup",
     "types:check": "tsc --noEmit",
     "test-typing": "tsc --noEmit -p test/type/tsconfig.json && tsc --noEmit -p test/tsconfig.json",
     "prepublishOnly": "pnpm build && pnpm test-packaging",

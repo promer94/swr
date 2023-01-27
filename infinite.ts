@@ -2,8 +2,8 @@
 // hook where `key` and return type are not like the normal `useSWR` types.
 
 import { useRef, useCallback } from 'react'
-import type { SWRConfig } from './index'
-import useSWR from './index'
+import type { SWRConfig } from 'swr'
+import useSWR from 'swr'
 import {
   isUndefined,
   isFunction,
@@ -12,14 +12,14 @@ import {
   useIsomorphicLayoutEffect,
   serialize,
   withMiddleware
-} from './_internal'
+} from 'swr/_internal'
 import type {
   BareFetcher,
   SWRHook,
   MutatorCallback,
   Middleware,
   MutatorOptions
-} from './_internal'
+} from 'swr/_internal'
 import type {
   SWRInfiniteConfiguration,
   SWRInfiniteResponse,
