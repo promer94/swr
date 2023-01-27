@@ -1,8 +1,7 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.test.json",
   "compilerOptions": { 
-    "strict": true,
-    "composite": true
+    "strict": true
   },
-  "include": ["./**/*.ts", "./**/*.tsx"],
+  "include": ["./**/*.ts","./**/*.tsx"]
 }

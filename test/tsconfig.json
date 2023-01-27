@@ -1,13 +1,11 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../tsconfig.test.json",
   "compilerOptions": {
-    "strict": false,
-    "composite": true
+    "strict": false
   },
-  "include": [".", "./jest-setup.ts"],
-  "references": [
-    {
-      "path": "./type"
-    }
-  ]
+  "include": [
+    ".",
+    "./jest-setup.ts"
+  ],
+  "exclude": ["type"]
 }

@@ -16,7 +16,8 @@
     "strictBindCallApply": true,
     "outDir": "./dist",
     "rootDir": "./",
-    "strict": true,
+    "strict": false,
+    "noEmit": true,
     "target": "ES2018",
     "baseUrl": ".",
     "noEmitOnError": true,
@@ -40,9 +41,9 @@
   },
   "exclude": [
     "dist",
-    "examples",
-    "test"
+    "examples"
   ],
+  "include": ["./**/*.ts", "./**/*.tsx"],
   "watchOptions": {
     "watchFile": "useFsEvents",
     "watchDirectory": "useFsEvents",

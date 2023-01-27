@@ -60,6 +60,7 @@
     "watch": "tsup --watch",
     "build": "tsup",
     "types:check": "tsc --noEmit",
+    "test-typing": "tsc --noEmit -p test/type/tsconfig.json && tsc --noEmit -p test/tsconfig.json",
     "prepublishOnly": "pnpm clean && pnpm build",
     "publish-beta": "pnpm publish --tag beta",
     "format": "prettier --write ./**/*.{ts,tsx}",
