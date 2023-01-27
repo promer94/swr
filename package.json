@@ -58,7 +58,7 @@
     "csb:install": "pnpm install",
     "csb:build": "pnpm build",
     "watch": "tsup --watch",
-    "bunchee": "bunchee --externals swr/_internal",
+    "build": "bunchee --external swr/_internal",
     "tsup": "tsup",
     "types:check": "tsc --noEmit",
     "test-typing": "tsc --noEmit -p test/type/tsconfig.json && tsc --noEmit -p test/tsconfig.json",
@@ -107,7 +107,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rimraf": "3.0.2",
-    "swr": "workspace:*",
+    "swr": "file:./",
     "tslib": "2.4.1",
     "tsup": "^6.5.0",
     "typescript": "4.9.4"
