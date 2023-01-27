@@ -61,7 +61,7 @@
     "build": "tsup",
     "types:check": "tsc --noEmit",
     "test-typing": "tsc --noEmit -p test/type/tsconfig.json && tsc --noEmit -p test/tsconfig.json",
-    "prepublishOnly": "pnpm clean && pnpm build",
+    "prepublishOnly": "pnpm build && pnpm test-packaging",
     "publish-beta": "pnpm publish --tag beta",
     "format": "prettier --write ./**/*.{ts,tsx}",
     "lint": "eslint . --ext .ts,.tsx --cache",
