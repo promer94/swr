@@ -12,5 +12,5 @@ export default defineConfig({
   target: 'es2018',
   clean: true,
   dts: true,
-  external: ['swr', 'swr/_internal', 'react']
+  external: ['swr', 'swr/_internal']
 })
