@@ -14,6 +14,25 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "./infinite": [
+        "./dist/infinite.d.ts"
+      ],
+      "./immutable": [
+        "./dist/immutable.d.ts"
+      ],
+      "./mutation": [
+        "./dist/mutation.d.ts"
+      ],
+      "./_internal": [
+        "./dist/_internal.d.ts"
+      ]
+    }
+  },
   "exports": {
     "./package.json": "./package.json",
     ".": {
