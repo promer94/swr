@@ -21,7 +21,7 @@ import {
   internalMutate,
   revalidateEvents,
   mergeObjects
-} from 'swr/_internal'
+} from '../_internal'
 import type {
   State,
   Fetcher,
@@ -34,7 +34,7 @@ import type {
   RevalidateEvent,
   StateDependencies,
   GlobalState
-} from 'swr/_internal'
+} from '../_internal'
 
 const WITH_DEDUPE = { dedupe: true }
 

@@ -5,7 +5,7 @@ import type {
   BareFetcher,
   State,
   StrictTupleKey
-} from 'swr/_internal'
+} from '../_internal/types'
 
 type FetcherResponse<Data = unknown> = Data | Promise<Data>
 

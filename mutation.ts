@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
-import useSWR, { useSWRConfig } from 'swr'
-import type { Middleware, Key } from 'swr/_internal'
+import useSWR, { useSWRConfig } from './index'
+import type { Middleware, Key } from './_internal'
 import {
   serialize,
   useStateWithDeps,
@@ -9,13 +9,13 @@ import {
   UNDEFINED,
   getTimestamp,
   mergeObjects
-} from 'swr/_internal'
+} from './_internal'
 import type {
   SWRMutationConfiguration,
   SWRMutationResponse,
   SWRMutationHook,
   MutationFetcher
-} from './types'
+} from './mutation/types'
 
 const mutation = (<Data, Error>() =>
   (
@@ -143,7 +143,7 @@ const mutation = (<Data, Error>() =>
  */
 export default withMiddleware(useSWR, mutation) as unknown as SWRMutationHook
 
-export {
+export type {
   SWRMutationConfiguration,
   SWRMutationResponse,
   SWRMutationHook,

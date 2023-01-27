@@ -2,8 +2,8 @@
 // hook where `key` and return type are not like the normal `useSWR` types.
 
 import { useRef, useCallback } from 'react'
-import type { SWRConfig } from 'swr'
-import useSWR from 'swr'
+import type { SWRConfig } from './index'
+import useSWR from './index'
 import {
   isUndefined,
   isFunction,
@@ -12,14 +12,14 @@ import {
   useIsomorphicLayoutEffect,
   serialize,
   withMiddleware
-} from 'swr/_internal'
+} from './_internal'
 import type {
   BareFetcher,
   SWRHook,
   MutatorCallback,
   Middleware,
   MutatorOptions
-} from 'swr/_internal'
+} from './_internal'
 import type {
   SWRInfiniteConfiguration,
   SWRInfiniteResponse,
@@ -27,7 +27,7 @@ import type {
   SWRInfiniteKeyLoader,
   SWRInfiniteFetcher,
   SWRInfiniteCacheValue
-} from './types'
+} from './infinite/types'
 import { useSyncExternalStore } from 'use-sync-external-store/shim/index.js'
 
 const INFINITE_PREFIX = '$inf$'
@@ -300,7 +300,7 @@ export const infinite = (<Data, Error>(useSWRNext: SWRHook) =>
 
 export default withMiddleware(useSWR, infinite) as SWRInfiniteHook
 
-export {
+export type {
   SWRInfiniteConfiguration,
   SWRInfiniteResponse,
   SWRInfiniteHook,

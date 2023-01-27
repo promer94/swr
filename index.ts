@@ -1,11 +1,9 @@
 // useSWR
-import useSWR from './use-swr'
+import useSWR from './core/use-swr'
 export default useSWR
 // Core APIs
-export { SWRConfig, unstable_serialize } from './use-swr'
-export { useSWRConfig } from 'swr/_internal'
-export { mutate } from 'swr/_internal'
-export { preload } from 'swr/_internal'
+export { SWRConfig, unstable_serialize } from './core/use-swr'
+export { useSWRConfig, mutate, preload } from './_internal'
 
 // Types
 export type {
@@ -25,4 +23,4 @@ export type {
   Middleware,
   Arguments,
   State
-} from 'swr/_internal'
+} from './_internal/types'
