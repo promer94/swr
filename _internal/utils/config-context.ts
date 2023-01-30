@@ -3,8 +3,8 @@ import {
   createContext,
   createElement,
   useContext,
-  useState,
-  useMemo
+  useMemo,
+  useRef
 } from 'react'
 import { cache as defaultCache } from './config'
 import { initCache } from './cache'
@@ -46,27 +46,28 @@ const SWRConfig: FC<
   // Should not use the inherited provider.
   const provider = config && config.provider
 
-  // Use a lazy initialized state to create the cache on first access.
-  const [cacheContext] = useState(() =>
-    provider
+  // Use a lazy initialized to create the cache on first access
+  const cacheContextRef = useRef<ReturnType<typeof initCache> | null>(null)
+  if (cacheContextRef.current === null) {
+    cacheContextRef.current = provider
       ? initCache(
           provider((extendedConfig as any).cache || defaultCache),
           config
         )
       : UNDEFINED
-  )
+  }
 
   // Override the cache if a new provider is given.
-  if (cacheContext) {
-    ;(extendedConfig as any).cache = cacheContext[0]
-    ;(extendedConfig as any).mutate = cacheContext[1]
+  if (cacheContextRef.current) {
+    ;(extendedConfig as any).cache = cacheContextRef.current[0]
+    ;(extendedConfig as any).mutate = cacheContextRef.current[1]
   }
 
   // Unsubscribe events.
   useIsomorphicLayoutEffect(() => {
-    if (cacheContext) {
-      cacheContext[2] && cacheContext[2]()
-      return cacheContext[3]
+    if (cacheContextRef.current) {
+      cacheContextRef.current[2] && cacheContextRef.current[2]()
+      return cacheContextRef.current[3]
     }
   }, [])
 
