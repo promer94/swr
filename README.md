@@ -8,8 +8,8 @@
   <a aria-label="NPM version" href="https://www.npmjs.com/package/swr">
     <img alt="" src="https://badgen.net/npm/v/swr">
   </a>
-  <a aria-label="Package size" href="https://bundlephobia.com/result?p=swr">
-    <img alt="" src="https://badgen.net/bundlephobia/minzip/swr">
+  <a aria-label="Package size" href="https://bundlejs.com/?q=swr&badge&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22react%22%2C%22use-sync-external-store%22%5D%7D%7D">
+    <img alt="" src="https://deno.bundlejs.com/?q=swr&badge&config=%7B%22esbuild%22%3A%7B%22external%22%3A%5B%22react%22%2C%22use-sync-external-store%22%5D%7D%7D">
   </a>
   <a aria-label="License" href="https://github.com/vercel/swr/blob/main/LICENSE">
     <img alt="" src="https://badgen.net/npm/license/swr">
